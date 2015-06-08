@@ -1,0 +1,15 @@
+
+# user configuration files
+*.suo
+*.user
+
+# build temporary folders
+Bin/
+bin/
+Debug/
+debug/
+Obj/
+obj/
+Release/
+release/
+
