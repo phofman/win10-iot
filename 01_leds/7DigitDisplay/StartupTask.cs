@@ -14,7 +14,7 @@ namespace DigitDisplay
         {
             var deferral = taskInstance.GetDeferral();
 
-            PrintTime(5000);
+            PrintTime(15000);
 
             deferral.Complete();
         }
@@ -55,8 +55,6 @@ namespace DigitDisplay
             if (gpio == null)
                 return;
 
-            var text = "6178";
-
             // initialize display:
             var segmentPins = new GpioPin[digitSegments.Length];
             for (int i = 0; i < digitSegments.Length; i++)
@@ -75,13 +73,15 @@ namespace DigitDisplay
             }
 
             DateTime start = DateTime.Now;
-            while ((DateTime.Now - start).TotalMilliseconds < timeout)
+            DateTime now;
+            while (((now = DateTime.Now) - start).TotalMilliseconds < timeout)
             {
-                PrintTime(text, segmentPins, selectorPins, digitMap, dotColumn);
+                var text = now.ToString("HHmm");
+                PrintTime(text, segmentPins, selectorPins, digitMap, dotColumn, (now.Second % 2) != 0);
             }
         }
 
-        private void PrintTime(string text, GpioPin[] segmentPins, GpioPin[] selectorPins, Dictionary<char, int[]> digitMap, int dotColumn)
+        private void PrintTime(string text, GpioPin[] segmentPins, GpioPin[] selectorPins, Dictionary<char, int[]> digitMap, int dotColumn, bool showDot)
         {
             // print text (char by char):
             for (int i = 0; i < 4 && i < text.Length; i++)
@@ -96,7 +96,7 @@ namespace DigitDisplay
                 }
 
                 // hide the dot:
-                segmentPins[7].Write(i == dotColumn ? GpioPinValue.Low : GpioPinValue.High);
+                segmentPins[7].Write(i == dotColumn && showDot ? GpioPinValue.Low : GpioPinValue.High);
 
                 selectorPins[i].Write(GpioPinValue.High);
                 Task.Delay(1).Wait();
