@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Windows.ApplicationModel.Background;
 using Windows.Devices.Gpio;
 
@@ -99,9 +100,33 @@ namespace DigitDisplay
                 segmentPins[7].Write(i == dotColumn && showDot ? GpioPinValue.Low : GpioPinValue.High);
 
                 selectorPins[i].Write(GpioPinValue.High);
-                Task.Delay(1).Wait();
+
+                // let the led to light for 1ms, before switching to the next one:
+                Sleep1ms();
                 selectorPins[i].Write(GpioPinValue.Low);
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoOptimization)]
+        private void Sleep1ms()
+        {
+            /*
+            // try to waste some cycles to create 1ms delay:
+            for (int j = 20; j < 35000; j++)
+            {
+            }
+            */
+
+            // waste some cycles to create 1ms delay:
+            var time = new Stopwatch();
+            time.Start();
+            while (time.ElapsedMilliseconds < 1)
+            {
+            }
+            time.Stop();
+
+            // this seems to sleep much more than expected:
+            //Task.Delay(1).Wait();
         }
     }
 }
